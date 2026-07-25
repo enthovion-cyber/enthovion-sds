@@ -37,7 +37,7 @@ const getNavItems = (locale: string) => [
 
   { href: `/${locale}/compliance`, label: "Compliance", icon: ShieldCheck },
   { href: `/${locale}/regulatory`, label: "Regulatory", icon: Scale },
-  { href: `/${locale}/mixtures`, label: "Mixture", icon: Scale },
+  { href: `/${locale}/mixture`, label: "Mixture", icon: Scale },
 
   { href: `/${locale}/validation`, label: "Validation", icon: CheckCircle },
   { href: `/${locale}/labels`, label: "Label", icon: Tag },
