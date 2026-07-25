@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ShieldCheck, AlertTriangle, XCircle, ExternalLink } from 'lucide-react';
@@ -14,7 +15,7 @@ const STATUS_META: Record<string, { label: string; icon: any; className: string 
   violations: { label: 'Violations', icon: XCircle, className: 'bg-red-50 text-red-800 border-red-200' },
 };
 
-export default function ContinuousCompliancePage() {
+function ContinuousComplianceContent() {
   const { locale } = useLocale();
   const searchParams = useSearchParams();
   const statusFilter = (searchParams.get('status') || '').toLowerCase();
@@ -133,3 +134,10 @@ export default function ContinuousCompliancePage() {
   );
 }
 
+export default function ContinuousCompliancePage() {
+  return (
+    <Suspense fallback={<PageSpinner />}>
+      <ContinuousComplianceContent />
+    </Suspense>
+  );
+}
