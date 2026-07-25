@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// 1. Tell Next.js to use Node.js runtime instead of Edge
 export const runtime = 'nodejs';
 
 const PUBLIC_PATHS = [
+  '/',                  // <-- Added Home Page as a public path!
   '/login',
   '/register',
   '/forgot-password',
@@ -12,6 +12,17 @@ const PUBLIC_PATHS = [
   '/reset-password',
   '/verify-email'
 ];
+
+// Paths that logged-in users should NOT be able to visit (auth forms)
+const AUTH_ONLY_PATHS = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/verify-otp',
+  '/reset-password',
+  '/verify-email'
+];
+
 const DEFAULT_LOCALE = 'en';
 const SUPPORTED_LOCALES = ['en', 'ar'];
 
@@ -19,7 +30,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isRSCRequest = request.headers.get('RSC') === '1';
 
-  // 1. Skip static files and internal Next.js paths
+  // 1. Skip static files, Next.js internal routes, and API routes
   if (
     pathname.startsWith('/_next') || 
     pathname.startsWith('/api') || 
@@ -28,7 +39,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Helper to handle RSC-safe redirects
+  // Helper for RSC-safe redirects
   const safeRedirect = (url: URL) => {
     const response = NextResponse.redirect(url);
     if (isRSCRequest) {
@@ -47,14 +58,14 @@ export function middleware(request: NextRequest) {
     ? cookieLocale 
     : DEFAULT_LOCALE;
 
-  // 2. Redirect root to dashboard
+  // 2. Redirect bare root (`/`) to localized home page (`/en` or `/ar`)
   if (pathname === '/') {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = `/${preferredLocale}/dashboard`;
+    redirectUrl.pathname = `/${preferredLocale}`; // Redirects to home page instead of dashboard
     return safeRedirect(redirectUrl);
   }
 
-  // 3. If no locale prefix, add default/preferred
+  // 3. If missing locale prefix, attach preferred locale
   if (!pathnameLocale) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = `/${preferredLocale}${pathname}`;
@@ -64,21 +75,26 @@ export function middleware(request: NextRequest) {
   const locale = pathnameLocale;
   const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/';
 
-  // 4. Stricter Public Path Matching
+  // 4. Check if current path is public
   const isPublicPath = PUBLIC_PATHS.some(
+    (p) => pathWithoutLocale === p || (p !== '/' && pathWithoutLocale.startsWith(`${p}/`))
+  );
+
+  const isAuthOnlyPath = AUTH_ONLY_PATHS.some(
     (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
   );
 
   const token = request.cookies.get('accessToken')?.value;
 
+  // 5. Unauthenticated user trying to access a protected route (e.g. /dashboard)
   if (!isPublicPath && !token) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = `/${locale}/login`;
     return NextResponse.redirect(loginUrl);
   }
 
-  // 5. Authenticated user trying to access public auth route (e.g., login)
-  if (isPublicPath && token) {
+  // 6. Authenticated user trying to access auth routes (e.g., /login or /register)
+  if (isAuthOnlyPath && token) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = `/${locale}/dashboard`;
     dashboardUrl.searchParams.forEach((_, key) => dashboardUrl.searchParams.delete(key));
