@@ -68,7 +68,7 @@ export default function Navbar({ title }: { title?: string }) {
     );
     setUnread((prev) => Math.max(0, prev - (notification.read_at ? 0 : 1)));
     setOpen(false);
-    router.push(buildNotificationHref(locale, notification));
+    router.push(buildNotificationHref(locale, notification) as any);
   };
 
   return (
