@@ -1,24 +1,23 @@
 import api from '@/lib/api';
+import type { Jurisdiction } from '@/utils/constants';
 
 const BASE_PATH = '/compliance'; 
 
 const complianceService = {
   // --- Core Auditing ---
-  // FIXED: Changed second argument from `null` to an empty object `{}`
-  auditSds: (id: string, jurisdiction = 'US_OSHA') => {
+  auditSds: (id: string, jurisdiction: Jurisdiction = 'US_OSHA') => {
     return api.post(`${BASE_PATH}/audit/${id}`, {}, { 
       params: { jurisdiction } 
     });
   },
   
-  // FIXED: Changed second argument from `null` to an empty object `{}`
-  auditLibrary: (jurisdiction = 'US_OSHA') => {
+  auditLibrary: (jurisdiction: Jurisdiction = 'US_OSHA') => {
     return api.post(`${BASE_PATH}/audit-library`, {}, { 
       params: { jurisdiction } 
     });
   },
   
-  getReport: (sdsId: string, jurisdiction?: string) => {
+  getReport: (sdsId: string, jurisdiction?: Jurisdiction) => {
     return api.get(`${BASE_PATH}/report/${sdsId}`, { 
       params: { jurisdiction } 
     });
@@ -30,7 +29,12 @@ const complianceService = {
   getGlobalSnapshot: () => api.get(`${BASE_PATH}/continuous/global-snapshot`),
 
   // --- Workflow & Auto-Fix ---
+  // FIXED: Renamed previewAutoFix -> getAutoFixPreview to match component usage
+  getAutoFixPreview: (id: string) => api.get(`${BASE_PATH}/auto-fix-preview/${id}`),
+  
+  // Optional alias in case previewAutoFix is called elsewhere in the codebase
   previewAutoFix: (id: string) => api.get(`${BASE_PATH}/auto-fix-preview/${id}`),
+
   startAutoFixWorkflow: (id: string) => api.post(`${BASE_PATH}/workflow/auto-fix/${id}`, {}),
   getWorkflowTasks: () => api.get(`${BASE_PATH}/workflow/tasks`),
   approveTask: (taskId: string) => api.post(`${BASE_PATH}/workflow/tasks/${taskId}/approve`, {}),

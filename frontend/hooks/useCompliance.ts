@@ -1,7 +1,9 @@
 'use client';
+
 import { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import complianceService from '@/services/complianceService';
+import { type Jurisdiction } from '@/utils/constants';
 
 export interface ComplianceReport {
   score: number;
@@ -13,7 +15,8 @@ export const useCompliance = () => {
   const [report, setReport] = useState<ComplianceReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const auditSds = useCallback(async (id: string, jurisdiction = 'US_OSHA') => {
+  // 1. Audit single SDS
+  const auditSds = useCallback(async (id: string, jurisdiction: Jurisdiction = 'US_OSHA') => {
     setIsLoading(true);
     try {
       const { data } = await complianceService.auditSds(id, jurisdiction);
@@ -29,11 +32,12 @@ export const useCompliance = () => {
     }
   }, []);
 
-  const auditLibrary = useCallback(async (jurisdiction = 'US_OSHA') => {
+  // 2. Audit entire Library
+  const auditLibrary = useCallback(async (jurisdiction: Jurisdiction = 'US_OSHA') => {
     setIsLoading(true);
     try {
       const { data } = await complianceService.auditLibrary(jurisdiction);
-      toast.success(`Library audit complete — ${data.data.audited} documents audited`);
+      toast.success(`Library audit complete — ${data.data.audited || 0} documents audited`);
       return data.data;
     } catch (err: any) {
       const errMsg = err?.response?.data?.message || 'Library audit failed';
@@ -44,7 +48,8 @@ export const useCompliance = () => {
     }
   }, []);
 
-  const fetchReport = useCallback(async (sdsId: string, jurisdiction?: string) => {
+  // 3. Fetch existing compliance report
+  const fetchReport = useCallback(async (sdsId: string, jurisdiction?: Jurisdiction) => {
     setIsLoading(true);
     try {
       const { data } = await complianceService.getReport(sdsId, jurisdiction);
@@ -59,6 +64,23 @@ export const useCompliance = () => {
     }
   }, []);
 
+  // 4. Load Auto-Fix Preview (Added missing hook method)
+  const getAutoFixPreview = useCallback(async (id: string) => {
+    setIsLoading(true);
+    try {
+      const { data } = await complianceService.getAutoFixPreview(id);
+      toast.success('Auto-fix preview ready');
+      return data.data;
+    } catch (err: any) {
+      const errMsg = err?.response?.data?.message || 'Unable to generate auto-fix preview';
+      toast.error(errMsg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // 5. Trigger Auto-Fix Workflow
   const triggerAutoFix = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
@@ -80,6 +102,7 @@ export const useCompliance = () => {
     auditSds, 
     auditLibrary, 
     fetchReport,
+    getAutoFixPreview,
     triggerAutoFix
   };
 };

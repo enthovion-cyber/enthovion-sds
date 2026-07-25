@@ -20,6 +20,7 @@ export interface SopContent {
   sopType: string;
   language: string;
   isRtl: boolean;
+  effectiveDate?: string; // Optional field for document effective date
   requiredPpe: Array<{ item: string; specification: string; icon?: string }>;
   procedureSteps: Array<{ step: number; action: string; warning?: string; critical: boolean }>;
   emergencyProcedures: Record<string, string>;
