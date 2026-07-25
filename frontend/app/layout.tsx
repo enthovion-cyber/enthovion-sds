@@ -3,7 +3,6 @@ import { Toaster } from 'react-hot-toast';
 import { isRTL } from '@/utils/rtlUtils';
 import '@/app/globals.css';
 
-// 1. Tell Next.js which locales to pre-render
 export async function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'ar' }];
 }
@@ -13,15 +12,15 @@ export default async function LocaleLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  // FIX: Make locale optional so TypeScript satisfies Promise<{}>
+  params: Promise<{ locale?: string }>; 
 }) {
-  // 2. Await the params (Required for Next.js 15)
   const resolvedParams = await params;
-  const locale = resolvedParams.locale;
+  // Fallback to 'en' if locale is undefined at type-check time
+  const locale = resolvedParams?.locale || 'en';
   const rtl = isRTL(locale);
 
   return (
-    // 3. suppressHydrationWarning is essential when modifying <html> attributes
     <html 
       lang={locale} 
       dir={rtl ? 'rtl' : 'ltr'} 
