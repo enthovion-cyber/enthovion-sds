@@ -1,0 +1,2 @@
+'use strict';
+const r=require('express').Router(),a=require('../utils/asyncHandler'),c=require('../controllers/mixtures/mixturesController');r.get('/',a(c.getAllMixturesController));r.post('/',a(c.createMixtureController));r.get('/:id',a(c.getMixtureByIdController));r.put('/:id',a(c.updateMixtureController));r.delete('/:id',a(c.deleteMixtureController));r.post('/:id/calculate',a(c.calculateHazardsController));module.exports=r;

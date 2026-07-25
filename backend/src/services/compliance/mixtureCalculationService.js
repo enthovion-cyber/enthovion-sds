@@ -1,0 +1,17 @@
+'use strict';
+const OpenAI = require('openai');
+const env = require('../../config/env');
+const client = new OpenAI({ apiKey: env.ai.openaiKey });
+
+const calculateAcuteToxicityMix=(components)=>{let sum=0;const details=[];for(const comp of components){const fraction=(parseFloat(comp.concentration_percent)||0)/100;const ate=parseFloat(comp.ate_oral||comp.ld50_oral);if(ate>0&&fraction>0){sum+=fraction/ate;details.push({component:comp.chemical_name,concentration:fraction*100,ate_used:ate});}else if(fraction>0){sum+=fraction/100;details.push({component:comp.chemical_name,concentration:fraction*100,ate_used:100,note:'ATE unknown — conservative default'});}}const ate_mix=sum>0?parseFloat((1/sum).toFixed(2)):null;let oral_category=null;if(ate_mix){if(ate_mix<=5)oral_category={cat:1,label:'Acute Tox. 1',signal:'DANGER',h_code:'H300'};else if(ate_mix<=50)oral_category={cat:2,label:'Acute Tox. 2',signal:'DANGER',h_code:'H300'};else if(ate_mix<=300)oral_category={cat:3,label:'Acute Tox. 3',signal:'DANGER',h_code:'H301'};else if(ate_mix<=2000)oral_category={cat:4,label:'Acute Tox. 4',signal:'WARNING',h_code:'H302'};else oral_category={cat:5,label:'Acute Tox. 5',signal:'WARNING',h_code:'H303'};}return{ate_mix,oral_category,calculation_details:details};};
+
+const applyConcentrationCutoffs=(components)=>{const hazards=[];for(const comp of components){const c=parseFloat(comp.concentration_max||comp.concentration_percent)||0;if(comp.is_carcinogen_cat1&&c>=0.1)hazards.push({source:comp.chemical_name,hazard:'Carcinogenicity Cat 1',h_code:'H350',basis:`${c}% ≥ 0.1%`});if(comp.is_carcinogen_cat2&&c>=1.0)hazards.push({source:comp.chemical_name,hazard:'Carcinogenicity Cat 2',h_code:'H351',basis:`${c}% ≥ 1.0%`});if(comp.is_reproductive_tox&&c>=0.3)hazards.push({source:comp.chemical_name,hazard:'Reproductive Toxicity',h_code:'H360',basis:`${c}% ≥ 0.3%`});if(comp.is_skin_sensitiser&&c>=0.1)hazards.push({source:comp.chemical_name,hazard:'Skin Sensitisation Cat 1',h_code:'H317',basis:`${c}% ≥ 0.1%`});if(comp.is_skin_corrosive&&c>=5.0)hazards.push({source:comp.chemical_name,hazard:'Skin Corrosion Cat 1',h_code:'H314',basis:`${c}% ≥ 5%`});}return hazards;};
+
+const calculateMixtureHazards=async({name,components=[],jurisdiction='US_OSHA'})=>{
+  const acuteTox=calculateAcuteToxicityMix(components);const cutoffs=applyConcentrationCutoffs(components);
+  const resp=await client.chat.completions.create({model:env.ai.openaiModel,messages:[{role:'user',content:`GHS Rev 7 mixture classification for "${name}". Components:${JSON.stringify(components.map(c=>({name:c.chemical_name,cas:c.cas_number,conc:c.concentration_percent+'%',role:c.role})))} ATE_mix:${JSON.stringify(acuteTox)} Cutoffs:${JSON.stringify(cutoffs)}\nReturn JSON:{"overall_classifications":[{"hazard_class":"","category":"","basis":"","h_code":""}],"signal_word":"DANGER or WARNING","all_h_codes":["H225"],"all_p_codes":["P210"],"pictograms":["GHS02"],"mixture_notes":"","confidence_score":78}`}],temperature:0.1,max_tokens:1200,response_format:{type:'json_object'}});
+  const ai=JSON.parse(resp.choices[0].message.content);
+  return{mixture_name:name,jurisdiction,components,acute_toxicity_calculation:acuteTox,concentration_cutoff_hazards:cutoffs,ai_classification:ai,overall_signal_word:ai.signal_word||'WARNING',all_h_codes:ai.all_h_codes||[],all_p_codes:ai.all_p_codes||[],pictograms:ai.pictograms||[],confidence_score:ai.confidence_score||70,calculated_at:new Date().toISOString()};
+};
+
+module.exports={calculateMixtureHazards,calculateAcuteToxicityMix,applyConcentrationCutoffs};
