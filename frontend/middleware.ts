@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// 1. Tell Next.js to use Node.js runtime instead of Edge
+export const runtime = 'nodejs';
+
 const PUBLIC_PATHS = [
   '/login',
   '/register',
@@ -29,8 +32,6 @@ export function middleware(request: NextRequest) {
   const safeRedirect = (url: URL) => {
     const response = NextResponse.redirect(url);
     if (isRSCRequest) {
-      // This header tells the Next.js client-side router to redirect 
-      // instead of failing the fetch payload.
       response.headers.set('x-nextjs-redirect', url.pathname + url.search);
     }
     return response;
@@ -53,7 +54,7 @@ export function middleware(request: NextRequest) {
     return safeRedirect(redirectUrl);
   }
 
-  // 3. If no locale prefix, add the default/preferred
+  // 3. If no locale prefix, add default/preferred
   if (!pathnameLocale) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = `/${preferredLocale}${pathname}`;
@@ -68,19 +69,18 @@ export function middleware(request: NextRequest) {
     (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
   );
 
-const token = request.cookies.get('accessToken')?.value;
+  const token = request.cookies.get('accessToken')?.value;
 
-if (!isPublicPath && !token) {
-  const loginUrl = request.nextUrl.clone();
-  loginUrl.pathname = `/${locale}/login`;
-  return NextResponse.redirect(loginUrl);
-}
+  if (!isPublicPath && !token) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = `/${locale}/login`;
+    return NextResponse.redirect(loginUrl);
+  }
 
-  // 6. Authenticated user trying to access public auth route (e.g., login)
+  // 5. Authenticated user trying to access public auth route (e.g., login)
   if (isPublicPath && token) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = `/${locale}/dashboard`;
-    // Clear search params
     dashboardUrl.searchParams.forEach((_, key) => dashboardUrl.searchParams.delete(key));
     return safeRedirect(dashboardUrl);
   }
@@ -89,6 +89,5 @@ if (!isPublicPath && !token) {
 }
 
 export const config = {
-  // Enhanced matcher to exclude all files with extensions
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };
