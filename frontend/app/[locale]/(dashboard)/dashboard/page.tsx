@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FileText, ShieldCheck, Clock, TrendingUp, Wand2, Upload } from 'lucide-react';
 import { useSds } from '@/hooks/useSds';
@@ -9,7 +9,6 @@ import SdsLibraryTable from '@/components/sds/SdsLibraryTable';
 import Button from '@/components/ui/Button';
 import { PageSpinner } from '@/components/ui/Spinner';
 import complianceService from '@/services/complianceService';
-import { useState } from 'react';
 
 function StatCard({
   label,
@@ -35,7 +34,7 @@ function StatCard({
     </div>
   );
 
-  return href ? <Link href={href}>{content}</Link> : content;
+  return href ? <Link href={href as any}>{content}</Link> : content;
 }
 
 export default function DashboardPage() {
@@ -77,13 +76,13 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="flex gap-3 mb-6">
-        <Link href={`/${locale}/sds/generate`}>
+        <Link href={`/${locale}/sds/generate` as any}>
           <Button leftIcon={<Wand2 size={14} />}>Generate SDS</Button>
         </Link>
-        <Link href={`/${locale}/sds/upload`}>
+        <Link href={`/${locale}/sds/upload` as any}>
           <Button variant="secondary" leftIcon={<Upload size={14} />}>Upload SDS</Button>
         </Link>
-        <Link href={`/${locale}/compliance`}>
+        <Link href={`/${locale}/compliance` as any}>
           <Button variant="outline" leftIcon={<ShieldCheck size={14} />}>Run compliance audit</Button>
         </Link>
       </div>
@@ -92,7 +91,7 @@ export default function DashboardPage() {
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Recent SDS documents</h2>
-          <Link href={`/${locale}/sds`} className="text-xs text-gray-500 hover:text-gray-900">View all →</Link>
+          <Link href={`/${locale}/sds` as any} className="text-xs text-gray-500 hover:text-gray-900">View all →</Link>
         </div>
         <SdsLibraryTable items={list} locale={locale} />
       </div>
