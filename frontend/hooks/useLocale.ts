@@ -11,7 +11,7 @@ export const useLocale = () => {
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
     const current = window.location.pathname;
     const withoutLocale = current.replace(`/${locale}`, '') || '/';
-    router.push(`/${newLocale}${withoutLocale}`);
+    router.push(`/${newLocale}${withoutLocale}` as any);
   };
 
   return { locale, isRTL: isRTL(locale), dir: isRTL(locale) ? 'rtl' : 'ltr', switchLocale };
