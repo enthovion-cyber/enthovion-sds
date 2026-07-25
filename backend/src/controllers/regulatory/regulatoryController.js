@@ -2,7 +2,7 @@ const {
   classifyHazards,
   validateCompliance,
   JURISDICTION_FRAMEWORKS,
-} = require("../../services/compliance/Regulatoryengine");
+} = require("../../services/compliance/regulatoryEngine");
 
 const {
   getRecentUpdates,

@@ -1,7 +1,7 @@
 const sdsModel = require("../../models/sdsModel");
 const mixturesModel = require("../../models/mixturesModel");
 const { scoreDocument } = require("../validation/aiValidationService");
-const { validateCompliance, detectConflicts } = require("./Regulatoryengine");
+const { validateCompliance, detectConflicts } = require("./regulatoryEngine");
 const { extractLabelData } = require("../ai/labelGeneratorService");
 const { openai } = require("../ai/openaiService");
 const {

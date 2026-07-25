@@ -3,7 +3,7 @@ const { supabaseAdmin } = require("../../config/database");
 const {
   scoreDocument,
 } = require("../validation/aiValidationService");
-const { detectConflicts } = require("./Regulatoryengine");
+const { detectConflicts } = require("./regulatoryEngine");
 const {
   getRecentUpdates,
   getSdsReviewStatus,

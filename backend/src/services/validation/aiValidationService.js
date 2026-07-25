@@ -3,7 +3,7 @@
  * Scores SDS completeness, detects conflicts, assigns confidence score
  */
 const { openai } = require('../ai/openaiService');
-const { detectConflicts } = require('../compliance/Regulatoryengine');
+const { detectConflicts } = require('../compliance/regulatoryEngine');
 const env = require('../../config/env');
 
 const SECTION_WEIGHTS = {

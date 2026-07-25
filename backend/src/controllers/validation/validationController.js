@@ -6,7 +6,7 @@ const {
 } = require("../../services/validation/aiValidationService");
 const {
   detectConflicts,
-} = require("../../services/compliance/Regulatoryengine");
+} = require("../../services/compliance/regulatoryEngine");
 const asyncHandler = require("../../utils/asyncHandler");
 const { success, notFound } = require("../../utils/responseHelper");
 
