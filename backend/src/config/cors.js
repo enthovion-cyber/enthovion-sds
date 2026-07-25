@@ -2,7 +2,7 @@ const env = require('./env');
 
 const allowedOrigins = [
   env.frontendUrl, // Ensure FRONTEND_URL=https://yourdomain.com in Vercel environment variables
-  'https://yourdomain.com', // Replace with your actual live domain
+  'https://sds.enthovion.com', // Replace with your actual live domain
   'https://www.yourdomain.com',
   'http://localhost:3000',
   'http://localhost:3001',
