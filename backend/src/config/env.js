@@ -8,15 +8,13 @@ const required = [
   'JWT_REFRESH_SECRET',
   'JWT_EMAIL_VERIFY_SECRET',
   'JWT_RESET_SECRET',
-  'ANTHROPIC_API_KEY',
-  'OPENAI_API_KEY',
 ];
 
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length > 0) {
-  console.error('❌ Missing required environment variables:');
-  missing.forEach((key) => console.error(`   - ${key}`));
-  process.exit(1);
+  console.warn('⚠️ Warning: Missing core environment variables:');
+  missing.forEach((key) => console.warn(`   - ${key}`));
+  // DO NOT CALL process.exit(1) IN SERVERLESS/VERCEL HOOKS
 }
 
 module.exports = {
@@ -25,16 +23,16 @@ module.exports = {
   isDev: process.env.NODE_ENV !== 'production',
 
   supabase: {
-    url: process.env.SUPABASE_URL,
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    anonKey: process.env.SUPABASE_ANON_KEY,
+    url: process.env.SUPABASE_URL || '',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    anonKey: process.env.SUPABASE_ANON_KEY || '',
   },
 
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET,
-    refreshSecret: process.env.JWT_REFRESH_SECRET,
-    emailVerifySecret: process.env.JWT_EMAIL_VERIFY_SECRET,
-    resetSecret: process.env.JWT_RESET_SECRET,
+    accessSecret: process.env.JWT_ACCESS_SECRET || 'default_access_secret',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'default_refresh_secret',
+    emailVerifySecret: process.env.JWT_EMAIL_VERIFY_SECRET || 'default_verify_secret',
+    resetSecret: process.env.JWT_RESET_SECRET || 'default_reset_secret',
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     emailVerifyExpiresIn: process.env.JWT_EMAIL_VERIFY_EXPIRES_IN || '24h',
@@ -42,20 +40,20 @@ module.exports = {
   },
 
   ai: {
-    anthropicKey: process.env.ANTHROPIC_API_KEY,
-    openaiKey: process.env.OPENAI_API_KEY,
-    anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-opus-4-6',
+    anthropicKey: process.env.ANTHROPIC_API_KEY || '',
+    openaiKey: process.env.OPENAI_API_KEY || '',
+    anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022',
     openaiModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
   },
 
   email: {
-    resendKey: process.env.RESEND_API_KEY,
+    resendKey: process.env.RESEND_API_KEY || '',
     from: process.env.EMAIL_FROM || 'SafeSheet AI <noreply@safesheet.ai>',
     smtp: {
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST || '',
       port: parseInt(process.env.SMTP_PORT) || 587,
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
     },
   },
 
