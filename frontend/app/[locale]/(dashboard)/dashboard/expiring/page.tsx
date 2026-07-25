@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Clock, FileText } from 'lucide-react';
@@ -9,7 +10,7 @@ import sdsService from '@/services/sdsService';
 import { useLocale } from '@/hooks/useLocale';
 import { formatDate } from '@/utils/formatters';
 
-export default function ExpiringSdsPage() {
+function ExpiringSdsContent() {
   const { locale } = useLocale();
   const searchParams = useSearchParams();
   const days = Number.parseInt(searchParams.get('days') || '30', 10) || 30;
@@ -80,3 +81,10 @@ export default function ExpiringSdsPage() {
   );
 }
 
+export default function ExpiringSdsPage() {
+  return (
+    <Suspense fallback={<PageSpinner />}>
+      <ExpiringSdsContent />
+    </Suspense>
+  );
+}
