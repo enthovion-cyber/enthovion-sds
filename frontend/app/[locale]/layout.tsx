@@ -1,15 +1,14 @@
 import { isRTL } from '@/utils/rtlUtils';
 
-// 1. Make the function async
-export default async function LocaleLayout({ 
+export default async function RootLayout({ 
   children, 
   params 
 }: { 
   children: React.ReactNode; 
-  params: Promise<{ locale: string }> // 2. Define params as a Promise
+  params: Promise<{ locale?: string }>; // Made locale optional
 }) {
-  // 3. Await the params
-  const { locale } = await params;
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale || 'en'; // Fallback to default locale
   const rtl = isRTL(locale);
 
   return (
