@@ -16,8 +16,10 @@ const deleteSdsController   = require('../controllers/sds/deleteSdsController');
 const exportSdsController   = require('../controllers/sds/exportSdsController');
 const approveSdsController  = require('../controllers/sds/approveSdsController');
 const searchSdsController   = require('../controllers/sds/searchSdsController');
+const getSdsLibrarySummaryController = require('../controllers/sds/getSdsLibrarySummaryController');
 
 // All SDS routes require authentication (applied in routes/index.js)
+router.get('/library-summary',                                                    asyncHandler(getSdsLibrarySummaryController));
 router.get('/search',           validate(searchSdsSchema, 'query'),             asyncHandler(searchSdsController));
 router.get('/',                                                                   asyncHandler(getAllSdsController));
 router.post('/generate',        aiLimiter,  validate(generateSdsSchema),        asyncHandler(generateSdsController));
