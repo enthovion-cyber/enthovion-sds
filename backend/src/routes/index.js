@@ -18,6 +18,7 @@ const validationRoutes = require("./validationRoutes");
 const labelsRoutes = require("./labelsRoutes");
 const pipelineRoutes = require("./pipelineRoutes"); // <-- Added this
 const copilotRoutes = require("./copilotRoutes");   // <-- Added this
+const dashboardRoutes = require("./dashboardRoutes");
 
 // 2. PUBLIC ROUTES
 router.use("/auth", authRoutes);
@@ -31,6 +32,7 @@ router.use("/user", authenticate, userRoutes);
 router.use("/regulatory", authenticate, regulatoryRoutes);
 router.use("/pipeline", authenticate, pipelineRoutes);
 router.use("/copilot", authenticate, copilotRoutes);
+router.use("/dashboard", authenticate, dashboardRoutes);
 router.use("/version", authenticate, versionsRoutes);
 router.use("/validation", authenticate, validationRoutes);
 router.use("/labels", authenticate, labelsRoutes);
